@@ -17,12 +17,32 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
+app.post("/login", (req, res) => {
+  console.log(req);
+  let usernameLogin = req.body.username;
+  console.log('Login username: ' + usernameLogin);
+  res.cookie('username', usernameLogin);
+
+  res.redirect(`http://localhost:8080/urls`);
+});
+
+app.post("/logout", (req, res) => {
+  console.log(req);
+  res.clearCookie('username');
+
+  res.redirect(`http://localhost:8080/urls`);
+});
+
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -32,8 +52,9 @@ app.post("/urls", (req, res) => {
   console.log(shortURL);  // debug statement to see random-generated shortURL string
   urlDatabase[shortURL] = longURL;
   console.log(urlDatabase); // debug statement to see the new key:value pair added to urlDatabase
+  let templateVars = {username: req.cookies["username"]};
 
-  res.redirect(`http://localhost:8080/urls/${shortURL}`); // Respond with redirect
+  res.redirect(`http://localhost:8080/urls/${shortURL}`, templateVars); // Respond with redirect
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -44,7 +65,8 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    urls: urlDatabase
+    urls: urlDatabase,
+    username: req.cookies["username"]
   };
   res.render("urls_show", templateVars);
 });
@@ -52,16 +74,18 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let urlToEdit = req.params.id
   urlDatabase[urlToEdit] = req.body.urlEdit;
+  let templateVars = {username: req.cookies["username"]};
 
-  res.redirect("/urls");
+  res.redirect("/urls", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
+  let templateVars = {username: req.cookies["username"]};
 
   delete urlDatabase[urlToDelete];
 
-  res.redirect('/urls');
+  res.redirect('/urls', templateVars);
 })
 
 app.get("/urls.json", (req, res) => {
