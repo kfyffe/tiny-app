@@ -8,5 +8,8 @@
     <% include ./partials/_header %>
   </header>
   <h2><%= urls[shortURL] %> - <%= shortURL %></h2>
+  <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
+    <button type="submit">DELETE</button>
+  </form>
 </body>
 </html>

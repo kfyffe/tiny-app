@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  "9sm5xK": "http://www.google.com"
 };
 
 app.get("/", (req, res) => {
@@ -49,6 +49,14 @@ app.get("/urls/:id", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
+
+app.post("/urls/:id/delete", (req, res) => {
+  let urlToDelete = req.params.id
+
+  delete urlDatabase[urlToDelete];
+
+  res.redirect('/urls');
+})
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
