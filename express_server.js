@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com",
 };
 
 app.get("/", (req, res) => {
@@ -27,8 +27,19 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let longURL = req.body.longURL;
+  console.log(longURL); //debug statement to see longURL from POST parameters
+  let shortURL = generateRandomString();
+  console.log(shortURL);  // debug statement to see random-generated shortURL string
+  urlDatabase[shortURL] = longURL;
+  console.log(urlDatabase); // debug statement to see the new key:value pair added to urlDatabase
+
+  res.redirect(`http://localhost:8080/urls/${shortURL}`); // Respond with redirect
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 
 app.get("/urls/:id", (req, res) => {
