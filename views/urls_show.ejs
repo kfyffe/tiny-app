@@ -9,10 +9,11 @@
   </header>
   <h2><%= urls[shortURL] %> - <%= shortURL %></h2>
   <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
-    <button type="submit">DELETE</button>
+    <button type="submit">Delete this record</button>
   </form>
+  <br>
   <form method="POST" action=<%= `/urls/${shortURL}`%>>
-    <input type=text name='ShortURL' value=<%=urls[shortURL]%>/>
+    <input type=text name='urlEdit'/>
     <button type="submit">Update</button>
   </form>
 </body>

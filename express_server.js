@@ -51,11 +51,10 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.id,
-    urls: urlDatabase
-  };
-  res.redirect("/urls/:id");
+  let urlToEdit = req.params.id
+  urlDatabase[urlToEdit] = req.body.urlEdit;
+
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
