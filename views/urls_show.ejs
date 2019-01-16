@@ -11,5 +11,9 @@
   <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
     <button type="submit">DELETE</button>
   </form>
+  <form method="POST" action=<%= `/urls/${shortURL}`%>>
+    <input type=text name='ShortURL' value=<%=urls[shortURL]%>/>
+    <button type="submit">Update</button>
+  </form>
 </body>
 </html>

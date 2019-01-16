@@ -50,6 +50,14 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:id", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.id,
+    urls: urlDatabase
+  };
+  res.redirect("/urls/:id");
+});
+
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
 
