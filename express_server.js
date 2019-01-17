@@ -24,6 +24,17 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/register", (req, res) => {
+
+  res.render("urls_register");
+});
+
+app.post("/register", (req, res) => {
+  console.log(req);
+
+  res.redirect("/login");
+});
+
 app.post("/login", (req, res) => {
   console.log(req);
   let usernameLogin = req.body.username;
