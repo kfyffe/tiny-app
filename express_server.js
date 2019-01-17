@@ -35,9 +35,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  console.log('This is my cookie: ', req.cookies);
+  let userKey = req.cookies["user_id"] // username: req.cookies["username"]
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    username: users[userKey].email
   };
   res.render("urls_index", templateVars);
 });
@@ -48,20 +50,38 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req);
+
+  //console.log(req);
   let email = req.body.email;
   console.log(email); //debug statement to see email from POST parameters
   let password = req.body.password;
   console.log(password);  // debug statement to see password from POST parameters
-  let userRandomID = generateRandomString();
-  res.cookie('user_id', userRandomID);
-  users[userRandomID] = {userRandomID, email, password};
-  console.log(users); // debug statement to see the new key:value pair added to urlDatabase
-
-
-  res.redirect('http://localhost:8080/urls');
+  if (!email || !password) {
+    res.status(400);
+    res.redirect('/register');
+  } else {
+    for (let userId in users) {
+      console.log('The user is: ', users[userId].email);
+      if (email === users[userId].email){
+        console.log('This email already exists: ', users[userId].email);
+        res.status(400);
+        res.redirect('/register');
+        return;
+      }
+    }
+    let id = generateRandomString();
+    res.cookie('user_id', id);
+    users[id] = {
+      id,
+      email,
+      password
+    };
+    console.log(users); // debug statement to see the new key:value pair added to urlDatabase
+    res.redirect('http://localhost:8080/urls');
+  }
 });
 
+// app.get("/400")
 
 app.post("/login", (req, res) => {
   console.log(req);
@@ -80,7 +100,8 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username: req.cookies["username"]};
+  let userKey = req.cookies["user_id"]
+  let templateVars = {username: users[userKey].email};
   res.render("urls_new", templateVars);
 });
 
