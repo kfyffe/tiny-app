@@ -7,10 +7,28 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser());
 
-var urlDatabase = {
+const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  },
+  "71182": {
+    id: "71182",
+    email: "me@example.com",
+    password: "cat"
+  }
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -31,9 +49,19 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   console.log(req);
+  let email = req.body.email;
+  console.log(email); //debug statement to see email from POST parameters
+  let password = req.body.password;
+  console.log(password);  // debug statement to see password from POST parameters
+  let userRandomID = generateRandomString();
+  res.cookie('user_id', userRandomID);
+  users[userRandomID] = {userRandomID, email, password};
+  console.log(users); // debug statement to see the new key:value pair added to urlDatabase
 
-  res.redirect("/login");
+
+  res.redirect('http://localhost:8080/urls');
 });
+
 
 app.post("/login", (req, res) => {
   console.log(req);
