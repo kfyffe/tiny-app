@@ -37,20 +37,8 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-//GET route; user id stored as a cookie and displayed as email at the top of 'https://localhost:8080/urls' page. Uses 'urls_index.ejs' file.
-app.get("/urls", (req, res) => {
-  console.log('This is my cookie: ', req.cookies);
-  let userKey = req.cookies["user_id"] // username: req.cookies["username"]
-  let templateVars = {
-    urls: urlDatabase,
-    username: users[userKey].email
-  };
-  res.render("urls_index", templateVars);
-});
-
 //GET route; 'https://localhost:8080/register' page. Uses 'urls_register.ejs' file.
 app.get("/register", (req, res) => {
-
   res.render("urls_register");
 });
 
@@ -92,26 +80,52 @@ app.get("/login", (req, res) => {
 });
 //POST route; when on 'http://localhost:8080/login' page, and enter email and password.
 app.post("/login", (req, res) => {
-  console.log(req);
-  let usernameLogin = req.body.username;
-  console.log('Login username: ' + usernameLogin);
-  res.cookie('username', usernameLogin);
-
-  res.redirect(`http://localhost:8080/urls`);
+  //console.log('What is showing here?', req);
+  let email = req.body.email;
+  console.log(email); //debug statement to see email from POST parameters
+  let password = req.body.password;
+  console.log(password);  // debug statement to see password from POST parameters
+  if (!email || !password) {
+    res.status(400);
+    res.redirect('/login');
+  } else {
+    for (let userId in users) {
+      console.log('The user is: ', users[userId].email);
+      if (email === users[userId].email){
+        console.log('This user already exists: ', users[userId].email);
+        let id = users[userId].id;
+        res.cookie('user_id', id);
+        res.redirect(`http://localhost:8080/urls`);
+        return
+      } else {res.redirect('http://localhost:8080/register')}
+    }
+  }
+  // let userKey = req.cookies["user_id"]
+  // let templateVars = {username: users[userKey].email};
 });
 
 //POST route; when logging out, should clear cookies and not remember the user's email. After logout, redirects to 'http://localhost:8080/urls' page.
 app.post("/logout", (req, res) => {
-  console.log(req);
-  res.clearCookie('username');
+  res.clearCookie('user_id');
 
-  res.redirect(`http://localhost:8080/urls`);
+  res.redirect(`http://localhost:8080/login`);
+});
+
+//GET route; user id stored as a cookie and displayed as email at the top of 'https://localhost:8080/urls' page. Uses 'urls_index.ejs' file.
+app.get("/urls", (req, res) => {
+  console.log('This is my cookie: ', req.cookies);
+  let userKey = req.cookies["user_id"] // username: req.cookies["username"]
+  let templateVars = {
+    urls: urlDatabase,
+    user_id: users[userKey].id
+  };
+  res.render("urls_index", templateVars);
 });
 
 //GET route;
 app.get("/urls/new", (req, res) => {
   let userKey = req.cookies["user_id"]
-  let templateVars = {username: users[userKey].email};
+  let templateVars = {user_id: users[userKey].id};
   res.render("urls_new", templateVars);
 });
 
@@ -124,7 +138,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = longURL;
   console.log(urlDatabase); // debug statement to see the new key:value pair added to urlDatabase
   let userKey = req.cookies["user_id"]
-  let templateVars = {username: users[userKey].email};
+  let templateVars = {user_id: users[userKey].id};
 
   res.redirect(`http://localhost:8080/urls/${shortURL}`, templateVars); // Respond with redirect
 });
@@ -141,16 +155,16 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     urls: urlDatabase,
-    username: users[userKey].email
+    user_id: users[userKey].id
   };
   res.render("urls_show", templateVars);
 });
 
-//POST route;
+// POST route;
 app.post("/urls/:id", (req, res) => {
   let urlToEdit = req.params.id
   urlDatabase[urlToEdit] = req.body.urlEdit;
-  let templateVars = {username: users[userKey].email};
+  let templateVars = {user_id: users[userKey].id};
 
   res.redirect("/urls", templateVars);
 });
@@ -158,7 +172,7 @@ app.post("/urls/:id", (req, res) => {
 //POST route;
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
-  let templateVars = {username: users[userKey].email};
+  let templateVars = {user_id: users[userKey].id};
 
   delete urlDatabase[urlToDelete];
 
