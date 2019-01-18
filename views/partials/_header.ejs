@@ -1,4 +1,3 @@
-<!-- views/partials/_header.ejs -->
 <h1>Tiny App</h1>
 <p><%=username%>
 <%if(username){%> is logged in. Click this button to log out:
@@ -6,11 +5,3 @@
     <button type="submit">Logout</button>
   </form>
   </p>
- <% } else{ %>
-   <p>Login:
-  <form method="POST" action=<%=`/login`%>>
-    <input type=text name="username"/>
-    <button type="submit">sign in</button>
-  </form>
-  </p>
-<% } %>
