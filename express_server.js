@@ -51,27 +51,34 @@ app.post("/register", (req, res) => {
   console.log(password);  // debug statement to see password from POST parameters
   if (!email || !password) {
     res.status(400);
-    res.redirect('/register');
+    res.send('Email or Password is blank');
   } else {
+    let emailExists = false;
+
     for (let userId in users) {
-      console.log('The user is: ', users[userId].email);
       if (email === users[userId].email){
         console.log('This email already exists: ', users[userId].email);
-        res.status(400);
-        res.redirect('/login');
-        return;
+        emailExists = true;
+
       }
+
     }
-    let id = generateRandomString();
-    res.cookie('user_id', id);
-    users[id] = {
-      id,
-      email,
-      password
-    };
-    console.log(users); // debug statement to see the new key:value pair added to urlDatabase
-    res.redirect('http://localhost:8080/urls'); //after succesful registration, redirected to 'http://localhost:8080/urls' page.
+    if (emailExists) {
+      res.status(400);
+      res.send('This email already exists:');
+    } else {
+      let id = generateRandomString();
+      res.cookie('user_id', id);
+      users[id] = {
+        id,
+        email,
+        password
+      };
+      console.log(users); // debug statement to see the new key:value pair added to urlDatabase
+      res.redirect('http://localhost:8080/urls'); //after succesful registration, redirected to 'http://localhost:8080/urls' page.
+    }
   }
+
 });
 
 //GET route; shows a new login page rendered from 'urls_login.ejs' file.
@@ -80,38 +87,30 @@ app.get("/login", (req, res) => {
 });
 //POST route; when on 'http://localhost:8080/login' page, and enter email and password.
 app.post("/login", (req, res) => {
-  //console.log('What is showing here?', req);
   let email = req.body.email;
   console.log(email); //debug statement to see email from POST parameters
   let password = req.body.password;
   console.log(password);  // debug statement to see password from POST parameters
   if (!email || !password) {
     res.status(400);
-    res.redirect('/login');
+    res.send('Email or Password is blank');
   } else {
-    for (let userId in users) {
-      if (email === users[userId].email){
-        console.log('This user already exists: ', users[userId].email);
-      }
-      if (password === users[userId].password){
-          let id = users[userId].id;
-          res.cookie('user_id', id);
-          res.redirect(`http://localhost:8080/`);
-          return
-      } else if (password !== users[userId].password){
-            res.status(403);
-            res.redirect('http://localhost:8080/login')
-            return
-        }
+    let successfulLogin = false;
 
-     else {
-        res.status(403);
-        res.redirect('http://localhost:8080/register')
-        }
+    for (let userId in users) {
+      if ((email === users[userId].email) && (password === users[userId].password)){
+        console.log('User logged in with: ', users[userId].email, users[userId].password);
+        successfulLogin = true;
+        res.cookie('user_id', users[userId].id);
+        res.redirect('http://localhost:8080/urls'); //if entered existing email & password, redirected to 'http://localhost:8080/urls' page.
+      }
+    }
+    if (!successfulLogin) {
+      res.status(400);
+      res.send('Email or Password is incorrect');
     }
   }
-  // let userKey = req.cookies["user_id"]
-  // let templateVars = {username: users[userKey].email};
+
 });
 
 //POST route; when logging out, should clear cookies and not remember the user's email. After logout, redirects to 'http://localhost:8080/urls' page.
@@ -135,8 +134,17 @@ app.get("/urls", (req, res) => {
 //GET route;
 app.get("/urls/new", (req, res) => {
   let userKey = req.cookies["user_id"]
-  let templateVars = {user_id: users[userKey].email};
+  console.log(userKey);
+  if (userKey){
+    let templateVars = {
+    urls: urlDatabase,
+    user_id: users[userKey].email
+  };
   res.render("urls_new", templateVars);
+  } else {
+    res.redirect('/login');
+  }
+
 });
 
 //POST route;
