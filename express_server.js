@@ -98,7 +98,7 @@ app.post("/login", (req, res) => {
           res.cookie('user_id', id);
           res.redirect(`http://localhost:8080/`);
           return
-      } else if (password !== users[userId].passoword){
+      } else if (password !== users[userId].password){
             res.status(403);
             res.redirect('http://localhost:8080/login')
             return
