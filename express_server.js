@@ -9,8 +9,18 @@ app.use(cookieParser());
 
 //global object for storing urls
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+
+  "b2xVn2": {
+    shortURL: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "71182"
+  },
+  "9sm5xK": {
+    shortURL: "9sm5xK",
+    longURL: "http://www.google.com",
+    userID: ""
+  }
+
 };
 
 //global object for storing users
@@ -123,9 +133,12 @@ app.post("/logout", (req, res) => {
 //GET route; user id stored as a cookie and displayed as email at the top of 'https://localhost:8080/urls' page. Uses 'urls_index.ejs' file.
 app.get("/urls", (req, res) => {
   console.log('This is my cookie: ', req.cookies);
+  console.log('URL DATABASE: ', urlDatabase);
   let userKey = req.cookies["user_id"] // username: req.cookies["username"]
+  let userUrls = specificUserUrls(userKey);
+  console.log('UserURLS: ', userUrls);
   let templateVars = {
-    urls: urlDatabase,
+    urls: userUrls,
     user_id: users[userKey].email
   };
   res.render("urls_index", templateVars);
@@ -149,16 +162,16 @@ app.get("/urls/new", (req, res) => {
 
 //POST route;
 app.post("/urls", (req, res) => {
+  let userKey = req.cookies["user_id"]
+  let templateVars = {user_id: users[userKey].email};
   let longURL = req.body.longURL;
   console.log(longURL); //debug statement to see longURL from POST parameters
   let shortURL = generateRandomString();
   console.log(shortURL);  // debug statement to see random-generated shortURL string
-  urlDatabase[shortURL] = longURL;
+  let userID = userKey;
+  urlDatabase[shortURL] = {shortURL, longURL, userID};
   console.log(urlDatabase); // debug statement to see the new key:value pair added to urlDatabase
-  let userKey = req.cookies["user_id"]
-  let templateVars = {user_id: users[userKey].email};
 
-  res.redirect(`http://localhost:8080/urls/${shortURL}`, templateVars); // Respond with redirect
 });
 
 //GET route;
@@ -210,6 +223,17 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+function specificUserUrls(user_id) {
+  let userUrls = {};
+  for (let key in urlDatabase) {
+    let user = urlDatabase[key].userID;
+    if (user_id === user) {
+      userUrls[urlDatabase[key].shortURL] = urlDatabase[key].longURL;
+    }
+  }
+  return userUrls;
+}
 
 function generateRandomString() {
   let random_string = "";
