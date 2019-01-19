@@ -187,7 +187,7 @@ app.get("/urls/:id", (req, res) => {
   let userUrls = specificUserUrls(userKey);
   let templateVars = {
     shortURL: req.params.id,
-    urls: userUrls,
+    url: userUrls[req.params.id],
     user_id: users[userKey].email
   };
   res.render("urls_show", templateVars);

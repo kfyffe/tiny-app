@@ -10,7 +10,7 @@
   <h2>ShortURL: <%= shortURL %></h2>
   <br>
   <form method="POST" action=<%= `/urls/${shortURL}`%>>
-    <input type=text name='urlEdit'/>
+    <input type=text name='urlEdit' value=<%=`${url}`%>>
     <button type="submit">Update</button>
   </form>
   <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
