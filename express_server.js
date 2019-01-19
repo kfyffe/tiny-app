@@ -1,3 +1,5 @@
+
+const cookieSession = require('cookie-session')
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
@@ -7,6 +9,12 @@ const PORT = 8080; // default port 8080
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['super secret'],
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 //global object for storing urls
 const urlDatabase = {
@@ -80,7 +88,8 @@ app.post("/register", (req, res) => {
       res.send('This email already exists:');
     } else {
       let id = generateRandomString();
-      res.cookie('user_id', id);
+      console.log('This is their random id: ', id);
+      req.session.user_id = id;
       users[id] = {
         id: id,
         email : email,
@@ -113,7 +122,7 @@ app.post("/login", (req, res) => {
       if ((email === users[userId].email) && (bcrypt.compareSync(password, users[userId].password))){
         console.log('User logged in with: ', users[userId].email, users[userId].password);
         successfulLogin = true;
-        res.cookie('user_id', users[userId].id);
+        req.session.user_id = users[userId].id;
         res.redirect('http://localhost:8080/urls'); //if entered existing email & password, redirected to 'http://localhost:8080/urls' page.
       }
     }
@@ -127,16 +136,16 @@ app.post("/login", (req, res) => {
 
 //POST route; when logging out, should clear cookies and not remember the user's email. After logout, redirects to 'http://localhost:8080/urls' page.
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session.user_id = null;
 
   res.redirect(`http://localhost:8080/login`);
 });
 
 //GET route; user id stored as a cookie and displayed as email at the top of 'https://localhost:8080/urls' page. Uses 'urls_index.ejs' file.
 app.get("/urls", (req, res) => {
-  console.log('This is my cookie: ', req.cookies);
+  console.log('This is my cookie: ', req.session);
   console.log('URL DATABASE: ', urlDatabase);
-  let userKey = req.cookies["user_id"] // username: req.cookies["username"]
+  let userKey = req.session.user_id;
   let userUrls = specificUserUrls(userKey);
   console.log('UserURLS: ', userUrls);
   let templateVars = {
@@ -148,7 +157,7 @@ app.get("/urls", (req, res) => {
 
 //GET route;
 app.get("/urls/new", (req, res) => {
-  let userKey = req.cookies["user_id"]
+  let userKey = req.session.user_id;
   console.log(userKey);
   if (userKey){
     let templateVars = {
@@ -164,7 +173,7 @@ app.get("/urls/new", (req, res) => {
 
 //POST route;
 app.post("/urls", (req, res) => {
-  let userKey = req.cookies["user_id"]
+  let userKey = req.session.user_id;
   let templateVars = {user_id: users[userKey].email};
   let longURL = req.body.longURL;
   console.log(longURL); //debug statement to see longURL from POST parameters
@@ -185,7 +194,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //GET route;
 app.get("/urls/:id", (req, res) => {
-  let userKey = req.cookies["user_id"]
+  let userKey = req.session.user_id;
   let userUrls = specificUserUrls(userKey);
   let templateVars = {
     shortURL: req.params.id,
@@ -199,7 +208,7 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let urlToEdit = req.params.id
   console.log('REQUEST DATA: ', req.params.id, req.body.urlEdit);
-  let userKey = req.cookies["user_id"]
+  let userKey = req.session.user_id;
   if (userKey === urlDatabase[urlToEdit].userID) {
     urlDatabase[urlToEdit].longURL = req.body.urlEdit;
     res.redirect('/urls');
@@ -211,7 +220,7 @@ app.post("/urls/:id", (req, res) => {
 //POST route;
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
-  let userKey = req.cookies["user_id"]
+  let userKey = req.session.user_id;
   if (userKey === urlDatabase[urlToDelete].userID) {
     delete urlDatabase[urlToDelete];
     res.redirect('/urls');
