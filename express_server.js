@@ -37,17 +37,17 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   },
   "71182": {
     id: "71182",
     email: "me@example.com",
-    password: "cat"
+    password: bcrypt.hashSync("cat", 10)
   }
 }
 
