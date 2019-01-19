@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
 app.use(bodyParser.urlencoded({extended: true}));
@@ -63,6 +64,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.send('Email or Password is blank');
   } else {
+    const hashedPassword = bcrypt.hashSync(password, 10);
     let emailExists = false;
 
     for (let userId in users) {
@@ -80,9 +82,9 @@ app.post("/register", (req, res) => {
       let id = generateRandomString();
       res.cookie('user_id', id);
       users[id] = {
-        id,
-        email,
-        password
+        id: id,
+        email : email,
+        password: hashedPassword
       };
       console.log(users); // debug statement to see the new key:value pair added to urlDatabase
       res.redirect('http://localhost:8080/urls'); //after succesful registration, redirected to 'http://localhost:8080/urls' page.
@@ -108,7 +110,7 @@ app.post("/login", (req, res) => {
     let successfulLogin = false;
 
     for (let userId in users) {
-      if ((email === users[userId].email) && (password === users[userId].password)){
+      if ((email === users[userId].email) && (bcrypt.compareSync(password, users[userId].password))){
         console.log('User logged in with: ', users[userId].email, users[userId].password);
         successfulLogin = true;
         res.cookie('user_id', users[userId].id);
