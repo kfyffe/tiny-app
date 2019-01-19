@@ -7,14 +7,14 @@
   <header>
     <% include ./partials/_header %>
   </header>
-  <h2><%= urls[shortURL] %> - <%= shortURL %></h2>
-  <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
-    <button type="submit">Delete this record</button>
-  </form>
+  <h2>ShortURL: <%= shortURL %></h2>
   <br>
   <form method="POST" action=<%= `/urls/${shortURL}`%>>
     <input type=text name='urlEdit'/>
     <button type="submit">Update</button>
+  </form>
+  <form method="POST" action=<%= `/urls/${shortURL}/delete`%>>
+    <button type="submit">Delete this record</button>
   </form>
 </body>
 </html>

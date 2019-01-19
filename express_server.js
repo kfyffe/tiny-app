@@ -172,20 +172,22 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {shortURL, longURL, userID};
   console.log(urlDatabase); // debug statement to see the new key:value pair added to urlDatabase
 
+  res.redirect(`http://localhost:8080/urls/${shortURL}`);
 });
 
 //GET route;
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
 //GET route;
 app.get("/urls/:id", (req, res) => {
   let userKey = req.cookies["user_id"]
+  let userUrls = specificUserUrls(userKey);
   let templateVars = {
     shortURL: req.params.id,
-    urls: urlDatabase,
+    urls: userUrls,
     user_id: users[userKey].email
   };
   res.render("urls_show", templateVars);
@@ -203,8 +205,9 @@ app.post("/urls/:id", (req, res) => {
 //POST route;
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
-  let templateVars = {user_id: users[userKey].email};
-
+  let userKey = req.cookies["user_id"]
+  let userUrls = specificUserUrls(userKey);
+  if (userUrls)
   delete urlDatabase[urlToDelete];
 
   res.redirect('/urls', templateVars);
