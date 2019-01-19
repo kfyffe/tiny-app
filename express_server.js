@@ -196,21 +196,26 @@ app.get("/urls/:id", (req, res) => {
 // POST route;
 app.post("/urls/:id", (req, res) => {
   let urlToEdit = req.params.id
-  urlDatabase[urlToEdit] = req.body.urlEdit;
-  let templateVars = {user_id: users[userKey].email};
-
-  res.redirect("/urls", templateVars);
+  console.log('REQUEST DATA: ', req.params.id, req.body.urlEdit);
+  let userKey = req.cookies["user_id"]
+  if (userKey === urlDatabase[urlToEdit].userID) {
+    urlDatabase[urlToEdit].longURL = req.body.urlEdit;
+    res.redirect('/urls');
+  } else {
+    res.send('You are not the owner of this shortURL and cannot edit.')
+  }
 });
 
 //POST route;
 app.post("/urls/:id/delete", (req, res) => {
   let urlToDelete = req.params.id
   let userKey = req.cookies["user_id"]
-  let userUrls = specificUserUrls(userKey);
-  if (userUrls)
-  delete urlDatabase[urlToDelete];
-
-  res.redirect('/urls', templateVars);
+  if (userKey === urlDatabase[urlToDelete].userID) {
+    delete urlDatabase[urlToDelete];
+    res.redirect('/urls');
+  } else {
+    res.send('You are not the owner of this shortURL and cannot delete.')
+  }
 })
 
 //GET route;
