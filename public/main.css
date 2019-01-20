@@ -1,1 +1,33 @@
-main.css
+.top {
+    position: relative;
+    background-color: #ffffff;
+    height: 68px;
+    padding-top: 20px;
+    line-height: 50px;
+    overflow: hidden;
+    z-index: 2;
+}
+<style>
+    header {
+      align-items: center;
+      color: #DCDCDC;
+      font-family: Verdana, Geneva, sans-serif;
+    }
+    body {
+      background-color: #36486b;
+
+    }
+    h2 {
+      color:white;
+      font-family: 'PT Sans', sans-serif;
+    }
+
+    li {
+      color: white;
+    }
+    a {
+      color: #fefbd8;
+    }
+
+
+  </style>

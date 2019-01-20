@@ -51,9 +51,19 @@ const users = {
   }
 }
 
-//GET route to show 'Hello!' when going to https://localhost:8080
+//GET route; evaluates if user is logged in. If so, redirects to '/urls' page. If not logged in, redirects to '/login'.
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  let userKey = req.session.user_id;
+  console.log('USER KEY: ', userKey);
+  if (userKey){
+    let templateVars = {
+    urls: urlDatabase,
+    user_id: users[userKey].email
+  };
+  res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 //GET route; 'https://localhost:8080/register' page. Uses 'urls_register.ejs' file.
@@ -79,9 +89,7 @@ app.post("/register", (req, res) => {
       if (email === users[userId].email){
         console.log('This email already exists: ', users[userId].email);
         emailExists = true;
-
       }
-
     }
     if (emailExists) {
       res.status(400);
@@ -99,7 +107,6 @@ app.post("/register", (req, res) => {
       res.redirect('http://localhost:8080/urls'); //after succesful registration, redirected to 'http://localhost:8080/urls' page.
     }
   }
-
 });
 
 //GET route; shows a new login page rendered from 'urls_login.ejs' file.
@@ -113,7 +120,7 @@ app.post("/login", (req, res) => {
   let password = req.body.password;
   console.log(password);  // debug statement to see password from POST parameters
   if (!email || !password) {
-    res.status(400);
+    res.status(403);
     res.send('Email or Password is blank');
   } else {
     let successfulLogin = false;
@@ -127,7 +134,7 @@ app.post("/login", (req, res) => {
       }
     }
     if (!successfulLogin) {
-      res.status(400);
+      res.status(403);
       res.send('Email or Password is incorrect');
     }
   }
@@ -137,22 +144,32 @@ app.post("/login", (req, res) => {
 //POST route; when logging out, should clear cookies and not remember the user's email. After logout, redirects to 'http://localhost:8080/urls' page.
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
-
-  res.redirect(`http://localhost:8080/login`);
+  res.redirect(`http://localhost:8080/urls`);
 });
 
 //GET route; user id stored as a cookie and displayed as email at the top of 'https://localhost:8080/urls' page. Uses 'urls_index.ejs' file.
 app.get("/urls", (req, res) => {
-  console.log('This is my cookie: ', req.session);
-  console.log('URL DATABASE: ', urlDatabase);
   let userKey = req.session.user_id;
-  let userUrls = specificUserUrls(userKey);
-  console.log('UserURLS: ', userUrls);
-  let templateVars = {
-    urls: userUrls,
-    user_id: users[userKey].email
-  };
-  res.render("urls_index", templateVars);
+  console.log(userKey);
+  if (!userKey){
+    let templateVars = {
+      user_id: '',
+      urls: {}
+    }
+    res.status(403);
+    res.render("urls_index", templateVars);
+  } else {
+    console.log('This is the session cookie: ', req.session);
+    console.log('URL DATABASE: ', urlDatabase);
+    let userKey = req.session.user_id;
+    let userUrls = specificUserUrls(userKey);
+    console.log('UserURLS: ', userUrls);
+    let templateVars = {
+      urls: userUrls,
+      user_id: users[userKey].email
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 //GET route;
@@ -168,7 +185,6 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.redirect('/login');
   }
-
 });
 
 //POST route;
@@ -188,20 +204,51 @@ app.post("/urls", (req, res) => {
 
 //GET route;
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  let shortURL = req.params.shortURL;
+  console.log ('shortURL is ', shortURL);
+  let shorturlExists = false;
+  for (let key in urlDatabase){
+    console.log ('Key in urlDatabase is: ', key);
+    if (shortURL === key){
+      shorturlExists = true;
+    }
+  }
+  console.log ('shorturlExists: ', shorturlExists);
+  if (shorturlExists) {
+    let longURL = urlDatabase[shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(400);
+    res.send('Url does not exist.');
+    }
 });
 
 //GET route;
 app.get("/urls/:id", (req, res) => {
   let userKey = req.session.user_id;
-  let userUrls = specificUserUrls(userKey);
-  let templateVars = {
-    shortURL: req.params.id,
-    url: userUrls[req.params.id],
-    user_id: users[userKey].email
-  };
-  res.render("urls_show", templateVars);
+  if (!userKey){
+    let templateVars = {
+      user_id: '',
+      urls: {}
+    }
+    res.status(403);
+    res.render("urls_index", templateVars);
+  } else {
+    let userUrls = specificUserUrls(userKey);
+    for (let key in userUrls) {
+      if (req.params.id === userUrls[key]){
+        let templateVars = {
+          shortURL: req.params.id,
+          url: userUrls[req.params.id],
+          user_id: users[userKey].email
+        };
+        res.render("urls_show", templateVars);
+      } else {
+      res.status(400);
+      res.send('The shortURL entered either does not exist or you are not the owner.');
+      }
+    }
+    }
 });
 
 // POST route;

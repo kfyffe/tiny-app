@@ -1,13 +1,16 @@
 
 <h1>Tiny App</h1>
 <p>
-<%if(user_id !== undefined){%>
+<%if(user_id !== ''){%>
 <%=user_id%> is logged in. Click this button to log out:
   <form method="POST" action=<%=`/logout`%>>
     <button type="submit">Logout</button>
   </form>
   <% } else{ %>
+  You are not logged in, please register or login below:
+  <br>
   <a href="http://localhost:8080/register">Register</a>
+  <br>
   <a href="http://localhost:8080/login">Already Registered? Login</a>
   <% } %>
   </p>

@@ -1,25 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <style>
-    header {
-      color: white;
-    }
-    body {
-      background-color: #36486b;
-
-    }
-    h2 {
-      color:white;
-    }
-    li {
-      color: white;
-    }
-    a {
-      color: #fefbd8;
-    }
-
-  </style>
   <title>TinyApp</title>
 </head>
 <body>
@@ -36,6 +17,8 @@
       </li>
     <% } %>
   </ul>
-  <a href='http://localhost:8080/urls/new'>Shorten a new URL</a>
+  <%if(user_id !== ''){%>
+  <a href='http://localhost:8080/urls/new'>Create a New Short Link</a>
+  <% } %>
 </body>
 </html>
