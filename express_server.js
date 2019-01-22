@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -235,19 +236,20 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_index", templateVars);
   } else {
     let userUrls = specificUserUrls(userKey);
+    console.log('USER URLS: ', userUrls)
     for (let key in userUrls) {
-      if (req.params.id === userUrls[key]){
+      if (req.params.id === key){
         let templateVars = {
           shortURL: req.params.id,
           url: userUrls[req.params.id],
           user_id: users[userKey].email
         };
-        res.render("urls_show", templateVars);
-      } else {
-      res.status(400);
-      res.send('The shortURL entered either does not exist or you are not the owner.');
+        return res.render("urls_show", templateVars);
       }
     }
+
+      res.status(400);
+      res.send('The shortURL entered either does not exist or you are not the owner.');
     }
 });
 
